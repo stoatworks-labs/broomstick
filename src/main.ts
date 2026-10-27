@@ -33,7 +33,9 @@ let touch = matchMedia('(pointer: coarse)').matches
  * Press to start, as usual. An autopilot's score is never kept as the best.
  */
 const params = new URLSearchParams(location.search)
-const pilotUntil = params.has('pilot') ? Number(params.get('pilot')) || Infinity : null
+const pilotParam = params.get('pilot')
+const pilotUntil =
+  pilotParam === null ? null : pilotParam === '' || !Number.isFinite(Number(pilotParam)) ? Infinity : Math.max(0, Math.floor(Number(pilotParam)))
 const seedParam = params.get('seed')
 
 const seedNow = () => (Date.now() ^ (performance.now() * 1000)) >>> 0
@@ -42,8 +44,10 @@ let game: Game = newGame(seedParam ? Number(seedParam) >>> 0 : seedNow(), 1000)
 const scene = new Scene(seedParam ? hash(Number(seedParam), 7) : seedNow())
 
 /**
- * What happens, as a `broomstick` event on window, for anything embedding or filming the
- * game: start, score, crash, over and restart, each with the score so far.
+ * What happens, as a `broomstick` event on window, for script running in the page itself
+ * (a browser driven by a script, as the video is filmed, or the console): start, score,
+ * crash, over and restart, each with the score so far. The page refuses to be framed, so
+ * it isn't for an embedding page.
  */
 function announce(type: 'start' | 'score' | 'crash' | 'over' | 'restart') {
   window.dispatchEvent(new CustomEvent('broomstick', { detail: { type, score: game.score, crash: game.crash } }))
@@ -60,8 +64,8 @@ function fitCanvas() {
   scale = h / WORLD_H
   const width = w / scale
   // A turned phone moves her across the screen and the trees with it: stop, and let the player look
-  // first. An address bar sliding away only nudges the picture, and carries on.
-  if (Math.abs(width - game.width) > game.width * 0.15) pause(game)
+  // first. An address bar sliding away only nudges the picture, and carries on. A demo flies on.
+  if (pilotUntil === null && Math.abs(width - game.width) > game.width * 0.15) pause(game)
   resize(game, width)
 }
 new ResizeObserver(fitCanvas).observe(canvas)
@@ -100,6 +104,8 @@ canvas.addEventListener('pointerdown', (e) => {
 // A touch only counts as a gesture that may start sound when the finger lifts.
 canvas.addEventListener('pointerup', () => sound.unlock())
 window.addEventListener('keydown', (e) => {
+  // Cmd-P prints and Cmd-M minimises: a shortcut is the browser's, not a flap or a pause.
+  if (e.metaKey || e.ctrlKey || e.altKey) return
   if (e.target instanceof HTMLButtonElement && (e.code === 'Space' || e.code === 'Enter')) return
   if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Enter') {
     e.preventDefault()

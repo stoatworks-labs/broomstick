@@ -1,5 +1,11 @@
 # Broomstick
 
+> **AI-assisted project.** This codebase was created with [Claude Code](https://claude.com/claude-code)
+> (Anthropic), directed and reviewed by a human author. There are 18 tests of the rules, and the
+> one that matters most flies the game's own autopilot through 50 pairs of trees on each of six
+> seeds without touching a branch. It has been played in Chromium at desktop and phone sizes,
+> the live site included. **It hasn't been tried in Safari or Firefox or on a real phone.**
+
 A witch on a broomstick, a forest at night, and a great many trees that were
 there first. Press Space, click or tap to fly. Thread her between the tree that
 grows up from the forest floor and the one hanging down from the canopy. Each
@@ -7,8 +13,9 @@ pair you get past is a point. Touch a branch or the ground and the run is over.
 The cat riding on the back is along for the view.
 
 **Play it at <https://broomstick.stoatworks-labs.com>**, on a phone or a
-desktop. It is a static Cloudflare Worker: nothing to install, and nothing
-leaves your browser but the request for the page.
+desktop. It is a static Cloudflare Worker: nothing to install, and the game
+itself sends nothing anywhere. [The user guide](docs/USER-GUIDE.md) has the
+rest.
 
 ## The artwork
 
@@ -46,7 +53,9 @@ Press to start, as usual. An autopilot's score is never kept as your best.
 
 The page also says what happens as a `broomstick` event on `window`, with the
 score so far in its `detail`: `start`, `score`, `crash` (with what she hit),
-`over` and `restart`.
+`over` and `restart`. It's for script running in the page itself, such as the
+browser that films the video. The page refuses to be framed, so an embedding
+page can't hear it.
 
 ## How it decides what you hit
 
@@ -54,8 +63,9 @@ Every solid branch of a tree is a polygon from Test Card's drawing, and the
 witch is fifteen points on hers: hat, head, nose, body, hand, boot, the front
 of the broom and the brush. Her cloak, her hair, the tip of her hat and the cat
 are scenery. The outermost twigs of each tree are drawn but forgiven; they
-reach a little way into the gap and no further. The tests fly a pilot through
-fifty trees on several seeds to show every gap can be flown.
+reach a little way into the gap and no further. The tests fly the autopilot
+through fifty pairs of trees on each of six seeds to show every gap can be
+flown.
 
 ## Running it
 
@@ -77,12 +87,17 @@ npm run check-art    # fail if src/art/ has drifted
 
 What has actually been run, rather than merely compiled:
 
-- **Verified:** the rules' tests (flight, pause, trees, gaps, scoring, a pilot
-  through 50 trees on 60 seeds); played in Chromium in the Claude desktop app's
+- **Verified:** the rules' tests (flight, pause, trees, gaps, scoring, the
+  autopilot through 50 pairs of trees on each of six seeds, and told to stop
+  at N, into the next tree on 24 runs); played in Chromium in the Claude desktop app's
   browser pane at desktop and phone sizes, including the built page under its
   real headers from `wrangler dev`; the live site serves that same build and CSP.
 - **Not verified:** Safari and Firefox, a real phone, sound on iOS, and frame
   rate on a slow device.
+
+<!-- attributions:start -->
+This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).
+<!-- attributions:end -->
 
 ## Licence
 

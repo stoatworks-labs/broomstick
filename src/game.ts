@@ -300,7 +300,8 @@ export function autopilot(g: Game, until = Infinity, t = TUNING): boolean {
   const w = g.witch
   const next = g.obstacles.find((o) => o.at - g.scroll + t.treeWidth / 2 > w.x - t.broom)
   let target = next ? (next.gapTop + next.gapBottom) / 2 + 30 : 500
-  if (next && g.score >= until) target = next.gapTop - 40
+  // Only into a tree she hasn't passed yet: the one just scored is still beside her for a while.
+  if (next && !next.passed && g.score >= until) target = next.gapTop - 40
   return w.y + MIDDLE > target && w.vy > 0
 }
 
@@ -372,7 +373,6 @@ export function step(g: Game, dt: number, t = TUNING): Events {
       g.score++
       ev.scored = true
     }
-    if (Math.abs(x - w.x) > t.treeWidth / 2 + t.broom) continue
     if (touches(o.below, x, pts) || touches(o.above, x, pts)) {
       crash(g, 'tree')
       ev.crashed = true

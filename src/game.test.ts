@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { CEILING, GROUND, TUNING, autopilot, growTree, hitPoints, inside, newGame, pause, press, step, touches, type Game } from './game'
+import { CEILING, GROUND, TUNING, autopilot, growTree, hitPoints, inside, newGame, pause, press, step, touches, type Game, type Obstacle } from './game'
 
 const DT = 1 / 240
 
@@ -154,15 +154,22 @@ describe('a whole run', () => {
     expect(g.score).toBeGreaterThan(10)
   })
 
-  test('told to stop after five, the autopilot flies into the sixth tree', () => {
-    const g = newGame(4, 1600)
-    press(g)
-    fly(g, 60, (g) => {
-      if (autopilot(g, 5)) press(g)
-    })
-    expect(g.mode).toBe('over')
-    expect(g.crash).toBe('tree')
-    expect(g.score).toBe(5)
+  test('told to stop after N, the autopilot flies into the next tree, not the one it has just passed', () => {
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      for (const n of [1, 3, 5]) {
+        const g = newGame(seed, 1600)
+        press(g)
+        let hit: Obstacle | undefined
+        for (let i = 0; i < 60 / DT && g.mode !== 'over'; i++) {
+          if (autopilot(g, n)) press(g)
+          if (step(g, DT).crashed && g.crash === 'tree') {
+            const pts = hitPoints(g.witch)
+            hit = g.obstacles.find((o) => touches(o.below, o.at - g.scroll, pts) || touches(o.above, o.at - g.scroll, pts))
+          }
+        }
+        expect({ seed, n, crash: g.crash, score: g.score, passed: hit?.passed }).toEqual({ seed, n, crash: 'tree', score: n, passed: false })
+      }
+    }
   })
 
   test('flying level at the height of a trunk ends the run against the tree', () => {
