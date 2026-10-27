@@ -1,0 +1,25 @@
+# Cloudflare deployment for Broomstick.
+#
+# A static-assets-only Worker, like Test Card: no server code. The fleet does
+# not use Cloudflare Pages.
+#
+# Deployed by hand from a checkout, not by a Cloudflare build:
+#
+#   npm ci && npm run build && cf-run npx wrangler@4.116.0 deploy
+#
+# `public/_headers` is copied into dist/ by Vite and carries the CSP; the
+# assets runtime honours it. `npm run preview` does not apply it.
+
+name = "broomstick"
+compatibility_date = "2026-07-30"
+workers_dev = false
+preview_urls = false
+
+[assets]
+directory = "./dist"
+
+# Attached here rather than by hand in the dashboard, so the hostname is part
+# of the repo and a fresh deploy cannot come up without it.
+[[routes]]
+pattern = "broomstick.stoatworks-labs.com"
+custom_domain = true

@@ -1,0 +1,23 @@
+{
+  "name": "broomstick",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A flappy-bird-style browser game: a witch on a broomstick, a forest at night, and trees that were there first. Drawn with Test Card's Halloween artwork.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sync-art": "node scripts/sync-art.mjs",
+    "check-art": "node scripts/sync-art.mjs --check",
+    "deploy": "npm run build && npx wrangler@4.116.0 deploy"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}
