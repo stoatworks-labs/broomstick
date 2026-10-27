@@ -41,7 +41,8 @@ function fit(ctx: CanvasRenderingContext2D, s: string, size: number, width: numb
   return w > width ? Math.floor((size * width) / w) : size
 }
 
-export function drawHud(ctx: CanvasRenderingContext2D, g: Game, best: number, newBest: boolean, touch: boolean) {
+/** `pilot`: the autopilot is flying, so the best score on screen would be somebody else's. */
+export function drawHud(ctx: CanvasRenderingContext2D, g: Game, best: number, newBest: boolean, touch: boolean, pilot = false) {
   const W = g.width
   const cx = W / 2
   const inner = W - 64
@@ -53,7 +54,7 @@ export function drawHud(ctx: CanvasRenderingContext2D, g: Game, best: number, ne
     text(ctx, 'Mind the trees.', cx, 300, fit(ctx, 'Mind the trees.', 40, inner, 400), { weight: 400, alpha: 0.85 })
     const blink = 0.55 + 0.45 * Math.sin(g.t * 4)
     text(ctx, how, cx, 700, fit(ctx, how, 38, inner), { colour: '#ffc23a', alpha: blink })
-    if (best > 0) text(ctx, `Best ${best}`, cx, 760, 30, { weight: 400, alpha: 0.7 })
+    if (best > 0 && !pilot) text(ctx, `Best ${best}`, cx, 760, 30, { weight: 400, alpha: 0.7 })
     return
   }
 
@@ -74,11 +75,13 @@ export function drawHud(ctx: CanvasRenderingContext2D, g: Game, best: number, ne
     ctx.fillRect(0, 0, W, WORLD_H)
     ctx.globalAlpha = 1
     text(ctx, String(g.score), cx, 300, 150, { alpha: k })
-    text(ctx, newBest && g.score > 0 ? 'A new best.' : `Best ${best}`, cx, 400, 40, { weight: 400, alpha: k, colour: newBest && g.score > 0 ? '#ffc23a' : '#f3ecd2' })
+    const fresh = newBest && g.score > 0
+    const under = pilot ? 'Flown by the autopilot' : fresh ? 'A new best.' : `Best ${best}`
+    text(ctx, under, cx, 400, 40, { weight: 400, alpha: k, colour: fresh ? '#ffc23a' : '#f3ecd2' })
     const q = quip(g)
     text(ctx, q, cx, 490, fit(ctx, q, 40, inner, 400), { weight: 400, alpha: k * 0.9 })
     if (g.sinceCrash > 0.6) {
-      const again = touch ? 'Tap to try again' : 'Click, tap or Space to try again'
+      const again = touch ? 'Tap to try again' : 'Click, tap or press Space to try again'
       text(ctx, again, cx, 640, fit(ctx, again, 38, inner), { colour: '#ffc23a', alpha: 0.55 + 0.45 * Math.sin(g.sinceCrash * 4) })
     }
   }

@@ -154,7 +154,7 @@ if (import.meta.env.DEV) {
   const paint = () => {
     ctx.setTransform(scale, 0, 0, scale, 0, 0)
     scene.draw(ctx, game, time, 0)
-    drawHud(ctx, game, best, newBest, touch)
+    drawHud(ctx, game, best, newBest, touch, pilotUntil !== null)
   }
   Object.assign(window, { broomstick: { game: () => game, press: onPress, advance, paint } })
 }
@@ -186,7 +186,7 @@ function frame(now: number) {
   }
   ctx.setTransform(scale, 0, 0, scale, 0, 0)
   scene.draw(ctx, game, time, game.mode === 'paused' ? 0 : dt)
-  drawHud(ctx, game, best, newBest, touch)
+  drawHud(ctx, game, best, newBest, touch, pilotUntil !== null)
   requestAnimationFrame(frame)
 }
 requestAnimationFrame(frame)

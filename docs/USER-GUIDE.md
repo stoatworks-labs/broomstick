@@ -127,7 +127,8 @@ one, and the game-over screen shows it after every run, or says "A new best." wh
 beaten it. Another browser, a private window or cleared site data starts again from nothing. If the
 browser won't let the page store anything, your best lasts as long as the page is open.
 
-A run flown by the autopilot (below) never counts as your best.
+A run flown by the autopilot (below) never counts as your best, and its game-over screen says
+"Flown by the autopilot" where your best would be.
 
 ---
 
