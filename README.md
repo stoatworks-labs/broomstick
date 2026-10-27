@@ -6,8 +6,9 @@ grows up from the forest floor and the one hanging down from the canopy. Each
 pair you get past is a point. Touch a branch or the ground and the run is over.
 The cat riding on the back is along for the view.
 
-It runs in a browser, on a phone or a desktop, and is served as a static
-Cloudflare Worker.
+**Play it at <https://broomstick.stoatworks-labs.com>**, on a phone or a
+desktop. It is a static Cloudflare Worker: nothing to install, and nothing
+leaves your browser but the request for the page.
 
 ## The artwork
 
@@ -61,7 +62,8 @@ What has actually been run, rather than merely compiled:
 
 - **Verified:** the rules' tests (flight, pause, trees, gaps, scoring, a pilot
   through 50 trees on 60 seeds); played in Chromium in the Claude desktop app's
-  browser pane at desktop and phone sizes.
+  browser pane at desktop and phone sizes, including the built page under its
+  real headers from `wrangler dev`; the live site serves that same build and CSP.
 - **Not verified:** Safari and Firefox, a real phone, sound on iOS, and frame
   rate on a slow device.
 
