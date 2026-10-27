@@ -1,23 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import { CEILING, GROUND, TUNING, growTree, hitPoints, inside, newGame, pause, press, step, touches, type Game } from './game'
+import { CEILING, GROUND, TUNING, autopilot, growTree, hitPoints, inside, newGame, pause, press, step, touches, type Game } from './game'
 
 const DT = 1 / 240
 
-/** Where her middle is relative to her broom: her hit points' average height, in world units. */
-const MIDDLE = (HIT_MEAN()) as number
-function HIT_MEAN() {
-  const g = newGame(1, 1600)
-  g.witch.y = 0
-  const ys = hitPoints(g.witch).map((p) => p[1])
-  return ys.reduce((a, b) => a + b, 0) / ys.length
-}
-
-/** A pilot who aims her middle at the middle of the next gap and flaps whenever she sinks below it. */
+/** The game's own autopilot, which `?pilot` flies the real page with. */
 function pilot(g: Game) {
-  const w = g.witch
-  const next = g.obstacles.find((o) => o.at - g.scroll + TUNING.treeWidth / 2 > w.x - TUNING.broom)
-  const target = next ? (next.gapTop + next.gapBottom) / 2 + 30 : 500
-  if (w.y + MIDDLE > target && w.vy > 0) press(g)
+  if (autopilot(g)) press(g)
 }
 
 function fly(g: Game, seconds: number, each?: (g: Game) => void) {
@@ -164,6 +152,17 @@ describe('a whole run', () => {
     }
     expect(scored).toBe(g.score)
     expect(g.score).toBeGreaterThan(10)
+  })
+
+  test('told to stop after five, the autopilot flies into the sixth tree', () => {
+    const g = newGame(4, 1600)
+    press(g)
+    fly(g, 60, (g) => {
+      if (autopilot(g, 5)) press(g)
+    })
+    expect(g.mode).toBe('over')
+    expect(g.crash).toBe('tree')
+    expect(g.score).toBe(5)
   })
 
   test('flying level at the height of a trunk ends the run against the tree', () => {

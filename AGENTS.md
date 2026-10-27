@@ -21,5 +21,9 @@ Invariants for anyone (human or agent) changing this repo.
   If the drawing changes shape, check them against it.
 - **Pausing never flaps.** The press that resumes is not aimed at anything, so she carries on from
   a standstill.
+- **The video depends on `?pilot`, `?seed` and the `broomstick` events.**
+  `stoatworks-backend/video/projects/broomstick` films the live page with them and times its
+  captions off the events. Renaming one breaks the next take. The autopilot is `autopilot()` in
+  `game.ts`, the same function the tests fly, so the demo can't fly a different game.
 - **Deploy is a static-assets Worker**, by hand (`wrangler.toml` has the command). No CI workflows
-  here.
+  here. A route on a proxied `AAAA 100::` record, not a custom domain: see `wrangler.toml`.

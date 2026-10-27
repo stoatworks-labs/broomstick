@@ -31,6 +31,23 @@ Card's spooky forest paints them, palette included.
 The game pauses itself when the tab is hidden, the window loses focus, or a
 phone is turned on its side.
 
+## For demos and films
+
+The address takes three switches. The showcase video is filmed with them, and
+they would do for a screen in a foyer.
+
+| Address | Does |
+| --- | --- |
+| `?pilot` | The game's own autopilot flies her: the same one the tests fly. Nothing pauses on its own |
+| `?pilot=12` | The same, for 12 points, after which it flies into the next tree, as most runs end |
+| `?seed=7` | The first run's trees, and the forest behind them, are the same every time |
+
+Press to start, as usual. An autopilot's score is never kept as your best.
+
+The page also says what happens as a `broomstick` event on `window`, with the
+score so far in its `detail`: `start`, `score`, `crash` (with what she hit),
+`over` and `restart`.
+
 ## How it decides what you hit
 
 Every solid branch of a tree is a polygon from Test Card's drawing, and the

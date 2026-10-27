@@ -1,10 +1,11 @@
 /** The page: a canvas, a clock, and one button's worth of input. */
 
-import { newGame, pause, press, resize, step, WORLD_H, type Game } from './game'
+import { autopilot, newGame, pause, press, resize, step, WORLD_H, type Game } from './game'
 import { Scene } from './scene'
 import { drawHud } from './hud'
 import { witch } from './art/halloween'
 import { fillShapes } from './art/shapes'
+import { hash } from './art/random'
 import * as sound from './sound'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!
@@ -24,10 +25,29 @@ try {
 let newBest = false
 let touch = matchMedia('(pointer: coarse)').matches
 
+/**
+ * For demos and the video, from the address:
+ *   ?pilot      the autopilot flies her (the one the tests fly), and nothing pauses on its own
+ *   ?pilot=12   ...for 12 points, then it flies into the next tree
+ *   ?seed=7     the first run's trees and the forest behind them are always the same
+ * Press to start, as usual. An autopilot's score is never kept as the best.
+ */
+const params = new URLSearchParams(location.search)
+const pilotUntil = params.has('pilot') ? Number(params.get('pilot')) || Infinity : null
+const seedParam = params.get('seed')
+
 const seedNow = () => (Date.now() ^ (performance.now() * 1000)) >>> 0
 let scale = 1
-let game: Game = newGame(seedNow(), 1000)
-const scene = new Scene(seedNow())
+let game: Game = newGame(seedParam ? Number(seedParam) >>> 0 : seedNow(), 1000)
+const scene = new Scene(seedParam ? hash(Number(seedParam), 7) : seedNow())
+
+/**
+ * What happens, as a `broomstick` event on window, for anything embedding or filming the
+ * game: start, score, crash, over and restart, each with the score so far.
+ */
+function announce(type: 'start' | 'score' | 'crash' | 'over' | 'restart') {
+  window.dispatchEvent(new CustomEvent('broomstick', { detail: { type, score: game.score, crash: game.crash } }))
+}
 
 function fitCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -53,13 +73,15 @@ function onPress() {
   if (what === 'restart') {
     game = newGame(seedNow(), game.width)
     newBest = false
+    announce('restart')
     return
   }
   if (what === 'flap' || what === 'start') sound.flap()
+  if (what === 'start') announce('start')
 }
 
 function finish() {
-  newBest = game.score > best
+  newBest = pilotUntil === null && game.score > best
   if (newBest) {
     best = game.score
     try {
@@ -90,10 +112,13 @@ window.addEventListener('keydown', (e) => {
     toggleMute()
   }
 })
+// A demo flies on in a window nobody is looking at.
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) pause(game)
+  if (document.hidden && pilotUntil === null) pause(game)
 })
-window.addEventListener('blur', () => pause(game))
+window.addEventListener('blur', () => {
+  if (pilotUntil === null) pause(game)
+})
 
 function showMute() {
   const m = sound.isMuted()
@@ -138,10 +163,20 @@ function frame(now: number) {
   carry += dt
   while (carry >= STEP) {
     carry -= STEP
+    if (pilotUntil !== null && autopilot(game, pilotUntil) && press(game) === 'flap') sound.flap()
     const ev = step(game, STEP)
-    if (ev.scored) sound.score()
-    if (ev.crashed) sound.thud()
-    if (ev.landed) finish()
+    if (ev.scored) {
+      sound.score()
+      announce('score')
+    }
+    if (ev.crashed) {
+      sound.thud()
+      announce('crash')
+    }
+    if (ev.landed) {
+      finish()
+      announce('over')
+    }
   }
   ctx.setTransform(scale, 0, 0, scale, 0, 0)
   scene.draw(ctx, game, time, game.mode === 'paused' ? 0 : dt)

@@ -285,6 +285,25 @@ export function pause(g: Game) {
   if (g.mode === 'flying') g.mode = 'paused'
 }
 
+/** Her middle, below or above the broom: the average height of her hit points, level. */
+const MIDDLE = (HIT_POINTS.reduce((sum, [, v]) => sum + v, 0) / HIT_POINTS.length) * TUNING.broom
+
+/**
+ * The autopilot: aim her middle at the middle of the next gap, and flap whenever she
+ * sinks below it. The tests fly it to show every gap can be flown; `?pilot` in the
+ * address flies the real game with it, for a demo or a film. Once she has `until`
+ * points it aims into the next hanging tree instead, so a demo ends the way most runs do.
+ * Says whether to press now.
+ */
+export function autopilot(g: Game, until = Infinity, t = TUNING): boolean {
+  if (g.mode !== 'flying') return false
+  const w = g.witch
+  const next = g.obstacles.find((o) => o.at - g.scroll + t.treeWidth / 2 > w.x - t.broom)
+  let target = next ? (next.gapTop + next.gapBottom) / 2 + 30 : 500
+  if (next && g.score >= until) target = next.gapTop - 40
+  return w.y + MIDDLE > target && w.vy > 0
+}
+
 /** Nose up when climbing, down when falling, eased toward. */
 function targetAngle(vy: number): number {
   return Math.max(-0.32, Math.min(0.55, vy / 1500))
